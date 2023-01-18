@@ -1,0 +1,40 @@
+/home/eshban/miniconda3/lib/python3.7/site-packages/torchvision/datasets/mnist.py:498: UserWarning: The given NumPy array is not writeable, and PyTorch does not support non-writeable tensors. This means you can write to the underlying (supposedly non-writeable) NumPy array using the tensor. You may want to copy the array to protect its data or make it writeable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at  ../torch/csrc/utils/tensor_numpy.cpp:181.)
+  return torch.from_numpy(parsed.astype(m[2], copy=False)).view(*s)
+  0%|                                                                                                                                                                      | 0/5 [00:00<?, ?it/s]
+ConvNet(
+  (layer1): Sequential(
+    (0): Conv2d(1, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): ReLU()
+    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (layer2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): ReLU()
+    (2): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Linear(in_features=1568, out_features=10, bias=True)
+)
+Loss after 00024 examples: 0.324
+
+ 20%|███████████████████████████████▌                                                                                                                              | 1/5 [00:05<00:22,  5.58s/it]
+Loss after 00074 examples: 0.181
+Loss after 00099 examples: 0.135
+Loss after 00124 examples: 0.090
+Loss after 00149 examples: 0.068
+Loss after 00174 examples: 0.053
+
+ 40%|███████████████████████████████████████████████████████████████▏                                                                                              | 2/5 [00:10<00:16,  5.36s/it]
+Loss after 00224 examples: 0.105
+Loss after 00249 examples: 0.089
+
+ 60%|██████████████████████████████████████████████████████████████████████████████████████████████▊                                                               | 3/5 [00:16<00:10,  5.48s/it]
+Loss after 00299 examples: 0.075
+Loss after 00324 examples: 0.066
+Loss after 00349 examples: 0.061
+
+ 80%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▍                               | 4/5 [00:21<00:05,  5.44s/it]
+Loss after 00399 examples: 0.012
+Loss after 00424 examples: 0.039
+Loss after 00449 examples: 0.016
+
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 5/5 [00:27<00:00,  5.43s/it]

@@ -33,6 +33,7 @@ config = dict(
 
 def model_pipeline(hyperparameters):
     with wandb.init(project="pytorch-mnist-demo", config=hyperparameters):
+        config = wandb.config
         model, train_loader, test_loader, criterion, optimizer = make(config)
         print(model)
         train(model, train_loader, criterion, optimizer, config)
@@ -44,7 +45,7 @@ def make(config):
     train_loader = make_loader(train, batch_size=config.batch_size)
     test_loader = make_loader(test, batch_size=config.batch_size)
     model = ConvNet(config.kernels, config.classes).to(device)
-    criterion = nn.CrossEntropy()
+    criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr=config.learning_rate
@@ -133,7 +134,7 @@ def train_batch(images, labels, model, optimizer, criterion):
     outputs = model(images)
     loss = criterion(outputs, labels)
     optimizer.zero_grad()
-    loss.backwards()
+    loss.backward()
     optimizer.step()
     return loss
 
