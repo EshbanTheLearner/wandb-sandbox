@@ -1,3 +1,4 @@
 *.onnx
 MNIST/
 wandb/
+lit-mnist/
