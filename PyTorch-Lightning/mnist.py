@@ -44,7 +44,7 @@ class LitMLP(pl.LightningModule):
 
     def loss(self, xs, ys):
         logits = self(xs)
-        loss = F.null_loss(logits, ys)
+        loss = F.nll_loss(logits, ys)
         return logits, loss
 
 def training_step(self, batch, batch_idx):
@@ -161,14 +161,14 @@ mnist = MNISTDataModule()
 mnist.prepare_data()
 mnist.setup()
 
-samples = next(iter(mnist.val_dataloader))
+samples = next(iter(mnist.val_dataloader()))
 
 wandb_logger = WandbLogger(project="lit-mnist")
 
 trainer = pl.Trainer(
     logger=wandb_logger,
     log_every_n_steps=50,
-    gpus=-1,
+    #gpus=-1,
     max_epochs=5,
     deterministic=True,
     callbacks=[
