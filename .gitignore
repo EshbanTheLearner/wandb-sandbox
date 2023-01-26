@@ -2,3 +2,4 @@
 MNIST/
 wandb/
 lit-mnist/
+keras_cifar*/

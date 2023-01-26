@@ -19,7 +19,7 @@ wandb.login()
 
 (x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
-x_train, x_test = x_train[::55] / 255., x_test / 255.
+x_train, x_test = x_train[::5] / 255., x_test / 255.
 y_train = y_train[::5]
 
 CLASS_NAMES = [
@@ -64,7 +64,7 @@ tf.keras.backend.clear_session()
 model = Model()
 model.summary()
 
-optimizer = tf.keras.optimizer.Adam(config.learning_rate)
+optimizer = tf.keras.optimizers.Adam(config.learning_rate)
 model.compile(optimizer, config.loss_function, metrics=["acc"])
 
 wandb_callbacks = [
