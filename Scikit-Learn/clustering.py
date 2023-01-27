@@ -33,6 +33,6 @@ run = wandb.init(
 
 wandb.sklearn.plot_elbow_curve(kmeans, X)
 wandb.sklearn.plot_silhouette(kmeans, X, labels)
-wandb.sklearn.plot_cluster(kmeans, X, cluster_labels, labels, "Kmeans")
+wandb.sklearn.plot_clusterer(kmeans, X, cluster_labels, labels, "Kmeans")
 
 wandb.finish()

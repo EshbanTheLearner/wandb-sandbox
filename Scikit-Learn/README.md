@@ -7,3 +7,7 @@
 ## Classification
 
 ![](classification_metrics.png)
+
+## Clustering
+
+![](clustering_metrics.png)
