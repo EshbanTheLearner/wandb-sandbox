@@ -15,7 +15,7 @@ wandb.login()
 
 wbcd = datasets.load_breast_cancer()
 
-feature_names = wbcd.features_names
+feature_names = wbcd.feature_names
 labels = wbcd.target_names
 
 X_train, X_test, y_train, y_test = train_test_split(wbcd.data, wbcd.target, test_size=0.2)
@@ -27,7 +27,7 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 y_probas = model.predict_proba(X_test)
 
-importances = model.faeture_importances_
+importances = model.feature_importances_
 indices = np.argsort(importances)[::-1]
 
 run = wandb.init(

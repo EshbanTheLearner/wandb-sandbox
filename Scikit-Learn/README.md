@@ -1,3 +1,9 @@
 # Weights and Biases Dashboard
 
-![](metrics.png)
+## Regression
+
+![](regression_metrics.png)
+
+## Classification
+
+![](classification_metrics.png)
