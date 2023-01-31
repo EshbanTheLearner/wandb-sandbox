@@ -93,3 +93,33 @@ print(f"Number of test records: {tf.data.experimental.cardinality(test_dataset).
 
 test_dataset = test_dataset.cache()
 test_dataset = test_dataset.batch(config.batch_size)
+
+class CNN(nn.Module):
+  pool_module: Callable = nn.avg_pool
+
+  def setup(self):
+    self.conv_1 = nn.Conv(features=32, kernel_size=(3, 3))
+    self.conv_2 = nn.Conv(features=32, kernel_size=(3, 3))
+    self.conv_3 = nn.Conv(features=64, kernel_size=(3, 3))
+    self.conv_4 = nn.Conv(features=64, kernel_size=(3, 3))
+    self.conv_5 = nn.Conv(features=128, kernel_size=(3, 3))
+    self.conv_6 = nn.Conv(features=128, kernel_size=(3, 3))
+    self.dense_1 = nn.Dense(features=1024)
+    self.dense_1 = nn.Dense(features=512)
+    self.dense_output = nn.Dense(features=10)
+
+  @nn.compact
+  def __call__(self, x):
+    x = nn.relu(self.conv_1(x))
+    x = nn.relu(self.conv_2(x))
+    x = self.pool_module(x, window_shape=(2, 2), stride=(2, 2))
+    x = nn.relu(self.conv_3(x))
+    x = nn.relu(self.conv_4(x))
+    x = self.pool_module(x, window_shape=(2, 2), strides=(2, 2))
+    x = nn.relu(self.conv_5(x))
+    x = nn.relu(self.conv_6(x))
+    x = self.pool_module(x, window_shape=(2, 2), strides=(2, 2))
+    x = x.reshape((x.shape[0], -1))
+    x = nn.relu(self.dense_1(x))
+    x = nn.relu(self.dense_2(x))
+    return self.dense_output(x)
