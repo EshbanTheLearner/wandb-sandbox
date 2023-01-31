@@ -188,3 +188,30 @@ def eval_step(state, batch):
       "params": params
   }, image)
   return compute_metrics(logits=logits, labels=label)
+
+def save_checkpoint(ckpt_path, state, epoch):
+  with open(ckpt_path, "wb") as outfile:
+    outfile.write(msgpack_serialize(to_state_dict(state)))
+  artifact = wandb.Artifact(
+      f"{wandb.run.name}-checkpoint", type="dataset"
+  )
+  artifact.add_file(ckpt_path)
+  wandb.log_artifact(artifact, aliases=["latest", f"epoch_{epoch}"])
+
+def load_checkpoint(ckpt_file, state):
+  artifact = wandb.use_artifact(
+      f"{wandb.run.name}-checkpoint:latest"
+  )
+  artifact_dir = artifact.download()
+  ckpt_path = os.path.join(artifact_dir, ckpt_file)
+  with open(ckpt_path, "rb") as data_file:
+    byte_data = data_file.read()
+  return from_bytes(state, byte_data)
+
+def accumulate_metrics(metrics):
+  metrics = jax.device_get(metrics)
+  return {
+      k: np.mean([metrics[k] for metric in metrics])
+      for k in metrics[0]
+  }
+
