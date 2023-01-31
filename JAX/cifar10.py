@@ -18,9 +18,7 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 
 wandb.init(
-    project="cifar10-jax",
-    entity="jax",
-    job_type="training-loop"
+    project="cifar10-jax"
 )
 
 config = wandb.config
@@ -105,14 +103,14 @@ class CNN(nn.Module):
     self.conv_5 = nn.Conv(features=128, kernel_size=(3, 3))
     self.conv_6 = nn.Conv(features=128, kernel_size=(3, 3))
     self.dense_1 = nn.Dense(features=1024)
-    self.dense_1 = nn.Dense(features=512)
+    self.dense_2 = nn.Dense(features=512)
     self.dense_output = nn.Dense(features=10)
 
   @nn.compact
   def __call__(self, x):
     x = nn.relu(self.conv_1(x))
     x = nn.relu(self.conv_2(x))
-    x = self.pool_module(x, window_shape=(2, 2), stride=(2, 2))
+    x = self.pool_module(x, window_shape=(2, 2), strides=(2, 2))
     x = nn.relu(self.conv_3(x))
     x = nn.relu(self.conv_4(x))
     x = self.pool_module(x, window_shape=(2, 2), strides=(2, 2))
@@ -130,7 +128,7 @@ model = CNN(pool_module=MODULE_DICT[config.pooling])
 params = model.init(rng, x)
 jax.tree_map(lambda x: x.shape, params)
 
-nn.tabulate(model, rng)(x)
+#nn.tabulate(model, rng)(x)
 
 def init_train_state(model, random_key, shape, learning_rate) -> train_state.TrainState:
   variables = model.init(random_key, jnp.ones(shape))
@@ -185,7 +183,7 @@ def train_step(state: train_state.TrainState, batch: jnp.ndarray):
 def eval_step(state, batch):
   image, label = batch
   logits = state.apply_fn({
-      "params": params
+      "params": state.params
   }, image)
   return compute_metrics(logits=logits, labels=label)
 
@@ -211,7 +209,7 @@ def load_checkpoint(ckpt_file, state):
 def accumulate_metrics(metrics):
   metrics = jax.device_get(metrics)
   return {
-      k: np.mean([metrics[k] for metric in metrics])
+      k: np.mean([metric[k] for metric in metrics])
       for k in metrics[0]
   }
 
