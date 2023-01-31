@@ -123,3 +123,44 @@ class CNN(nn.Module):
     x = nn.relu(self.dense_1(x))
     x = nn.relu(self.dense_2(x))
     return self.dense_output(x)
+
+rng = jax.random.PRNGKey(config.seed)
+x = jnp.ones(shape=(config.batch_size, 32, 32, 3))
+model = CNN(pool_module=MODULE_DICT[config.pooling])
+params = model.init(rng, x)
+jax.tree_map(lambda x: x.shape, params)
+
+nn.tabulate(model, rng)(x)
+
+def init_train_state(model, random_key, shape, learning_rate) -> train_state.TrainState:
+  variables = model.init(random_key, jnp.ones(shape))
+  optimizer = optax.adam(learning_rate)
+  return train_state.TrainState.create(
+      apply_fn=model.apply,
+      tx=optimizer,
+      params=variables["params"]
+  )
+
+state = init_train_state(
+    model, 
+    rng,
+    (config.batch_size, 32, 32, 3),
+    config.learning_rate
+)
+
+print(type(state))
+
+def cross_entropy_loss(*, logits, labels):
+  one_hot_encoded_labels = jax.nn.one_hot(labels, num_classes=10)
+  return optax.softmax_cross_entropy(
+      logits=logits, labels=one_hot_encoded_labels
+  ).mean()
+
+def compute_metrics(*, logits, labels):
+  loss = cross_entropy_loss(logits=logits, labels=labels)
+  accuracy = jnp.mean(jnp.argmax(logits, -1) == labels)
+  metrics = {
+      "loss": loss,
+      "accuracy": accuracy
+  }
+  return metrics
