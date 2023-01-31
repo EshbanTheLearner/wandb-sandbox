@@ -35,3 +35,11 @@ MODULE_DICT = {
     "avg": nn.avg_pool,
     "max": nn.max_pool
 }
+
+(full_train_set, test_dataset), ds_info = tfds.load(
+    "cifar10",
+    split=["train", "test"],
+    shuffle_files=True,
+    as_supervised=True,
+    with_info=True
+)
