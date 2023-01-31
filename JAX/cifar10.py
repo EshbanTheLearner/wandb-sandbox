@@ -164,3 +164,27 @@ def compute_metrics(*, logits, labels):
       "accuracy": accuracy
   }
   return metrics
+
+@jax.jit
+def train_step(state: train_state.TrainState, batch: jnp.ndarray):
+  image, label = batch
+  def loss_fn(params):
+    logits = state.apply_fn({
+        "params": params
+    }, image)
+    loss = cross_entropy_loss(logits=logits, labels=label)
+    return loss, logits
+  
+  gradient_fn = jax.value_and_grad(loss_fn, has_aux=True)
+  (_, logits), grads = gradient_fn(state.params)
+  state = state.apply_gradients(grads=grads)
+  metrics = compute_metrics(logits=logits, labels=label)
+  return state, metrics
+
+@jax.jit
+def eval_step(state, batch):
+  image, label = batch
+  logits = state.apply_fn({
+      "params": params
+  }, image)
+  return compute_metrics(logits=logits, labels=label)
