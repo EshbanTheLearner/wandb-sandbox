@@ -215,3 +215,65 @@ def accumulate_metrics(metrics):
       for k in metrics[0]
   }
 
+def train_and_evaluate(train_dataset, eval_dataset, test_dataset, state: train_state.TrainState, epochs: int):
+  num_train_batches = tf.data.experimental.cardinality(train_dataset)
+  num_eval_batches = tf.data.experimental.cardinality(eval_dataset)
+  num_test_batches = tf.data.experimental.cardinality(test_dataset)
+
+  for epoch in tqdm(range(1, epochs + 1)):
+    best_eval_loss = 1e6
+    
+    train_batch_metrics = []
+    train_datagen = iter(tfds.as_numpy(train_dataset))
+    for batch_idx in range(num_train_batches):
+      batch = next(train_datagen)
+      state, metrics = train_step(state, batch)
+      train_batch_metrics.append(metrics)
+    train_batch_metrics = accumulate_metrics(train_batch_metrics)
+    print(f"TRAIN {epoch}/{epochs}: Loss: {train_batch_metrics['loss']}, Accuracy: {train_batch_metrics['accuracy'] * 100}")
+    
+    eval_batch_metrics = []
+    eval_datagen = iter(tfds.as_numpy(eval_dataset))
+    for batch_idx in range(num_eval_batches):
+      batch = next(eval_datagen)
+      metrics = eval_step(state, batch)
+      eval_batch_metrics.append(metrics)
+    eval_batch_metrics  = accumulate_metrics(eval_batch_metrics)
+    print(f"EVAL {epoch}/{epochs} Loss: {eval_batch_metrics['loss']}, Accuracy: {eval_batch_metrics['accuracy'] * 100}")
+
+    wandb.log({
+        "Train Loss": train_batch_metrics["loss"],
+        "Train Accuracy": train_batch_metrics["accuracy"],
+        "Validation Loss": eval_batch_metrics["loss"],
+        "Validation Accuracy": eval_batch_metrics["accuracy"]
+    }, step=epoch)
+
+    if eval_batch_metrics["loss"] < best_eval_loss:
+      save_checkpoint("checkpoint.msgpack", state, epoch)
+  
+  restored_state = load_checkpoint("checkpoint.msgpack", state)
+  test_batch_metrics = []
+  test_datagen = iter(tfds.as_numpy(test_dataset))
+  for batch_idx in range(num_test_batches):
+    batch = next(test_datagen)
+    metrics = eval_step(restored_state, batch)
+    test_batch_metrics.append(metrics)
+
+  test_batch_metrics = accumulate_metrics(test_batch_metrics)
+  print(f"TEST Loss: {test_batch_metrics['loss']}, Accuracy: {test_batch_metrics['accuracy']*100}")
+  wandb.log({
+      "Test Loss": test_batch_metrics["loss"],
+      "Test Accuracy": test_batch_metrics["accuracy"]
+  })
+
+  return state, restored_state
+
+state, best_state = train_and_evaluate(
+    train_dataset,
+    val_dataset,
+    test_dataset,
+    state,
+    epochs=config.epochs
+)
+
+wandb.finish()
