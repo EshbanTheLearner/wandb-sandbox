@@ -1,5 +1,6 @@
 *.onnx
 MNIST/
 wandb/
+artifacts/
 lit-mnist/
 keras_cifar*/
