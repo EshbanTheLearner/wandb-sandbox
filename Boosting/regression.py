@@ -46,3 +46,12 @@ gbm = lgb.train(
 )
 
 log_summary(gbm, save_model_checkpoint=True)
+
+# predict
+y_pred = gbm.predict(X_test, num_iteration=gbm.best_iteration)
+
+# eval
+print('The rmse of prediction is:', mean_squared_error(y_test, y_pred) ** 0.5)
+wandb.log({'rmse_prediction': mean_squared_error(y_test, y_pred) ** 0.5})
+
+wandb.finish()
