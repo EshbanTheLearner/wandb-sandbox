@@ -1,4 +1,6 @@
 *.onnx
+*.train
+*.test
 MNIST/
 wandb/
 artifacts/
