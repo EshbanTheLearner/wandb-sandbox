@@ -8,8 +8,8 @@ from wandb.lightgbm import wandb_callback, log_summary
 wandb.login()
 
 # load or create your dataset
-df_train = pd.read_csv('regression.train', header=None, sep='\t')
-df_test = pd.read_csv('regression.test', header=None, sep='\t')
+df_train = pd.read_csv("Boosting/regression.train", header=None, sep='\t')
+df_test = pd.read_csv("Boosting/regression.test", header=None, sep='\t')
 
 y_train = df_train[0]
 y_test = df_test[0]
