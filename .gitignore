@@ -1,8 +1,10 @@
 *.onnx
 *.train
 *.test
+*.csv
 MNIST/
 wandb/
 artifacts/
 lit-mnist/
 keras_cifar*/
+__pycache__/

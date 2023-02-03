@@ -18,8 +18,8 @@ import xgboost as xgb
 import wandb
 wandb.login()
 
-data_dir = Path(".")
-model_dir = Path("models")
+data_dir = Path("./")
+model_dir = Path("./models")
 model_dir.mkdir(exist_ok=True)
 
 id_vars = ["UniqueID"]
@@ -70,3 +70,32 @@ processed_ds_art = wandb.Artifact(
 processed_ds_art.add_file(processed_data_path)
 run.log_artifact(processed_ds_art)
 run.finish()
+
+with wandb.init(project="xgboost-credit-scorecard", job_type='train-val-split', config={"wandb_nb":"wandb_credit_soc"}) as run:
+    dataset_art = run.use_artifact(
+        "vehicle_defaults_processed:latest", 
+        type="processed_dataset"
+    )
+    dataset_dir = dataset_art.download(data_dir)
+    dataset = pd.read_csv(processed_data_path)
+
+    test_size = 0.25
+    random_state = 42
+
+    run.config.update({
+        "test_size": test_size,
+        "random_state": random_state
+    })
+
+    train_data, val_data = model_selection.train_test_split(
+        dataset, 
+        test_size=test_size,
+        random_state=random_state, 
+        stratify=dataset[[targ_var]]
+    )
+
+    print(f"Train dataset size: {train_data[targ_var].value_counts()} \n")
+    print(f"Validation dataset sizeL {val_data[targ_var].value_counts()}")
+
+    train_path = data_dir/"train.csv"
+    val_path = data_dir/"val.csv"
