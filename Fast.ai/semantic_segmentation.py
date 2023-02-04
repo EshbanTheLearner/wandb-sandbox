@@ -22,8 +22,22 @@ dls = ImageDataLoaders.from_name_func(
 
 learn = vision_learner(
     dls, 
-    "convert_tiny",
+    "convnext_tiny",
     metrics=error_rate
 )
 learn.fine_tune(1)
 
+learn = vision_learner(
+    dls,
+    "convnext_tiny",
+    metrics=error_rate,
+    cbs=WandbCallback()
+)
+
+wandb.init(
+    project="fastai"
+)
+
+learn.fine_tune(1)
+
+wandb.finish()
