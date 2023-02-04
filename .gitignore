@@ -2,6 +2,7 @@
 *.train
 *.test
 *.csv
+models/
 MNIST/
 wandb/
 artifacts/
