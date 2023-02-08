@@ -30,3 +30,15 @@ model.compile(
     loss="sparse_categorical_crossentropy",
     metrics=["accuracy"]
 )
+
+tensorboard_callback = tf.keras.callbacks.TensorBoard(histogram_freq=1)
+
+model.fit(
+    x=x_train,
+    y=y_train,
+    epochs=5,
+    validation_data=(x_test, y_test),
+    callbacks=[tensorboard_callback]
+)
+
+wandb.finish()
