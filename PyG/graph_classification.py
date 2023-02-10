@@ -200,3 +200,23 @@ def test(loader, create_table=False):
         correct += int((pred == data.y).sum())
     return correct / len(loader.dataset), loss_ / len(loader.dataset), table
 
+for epoch in trange(1, 171):
+    train()
+    train_acc, train_loss, _ = test(train_loader)
+    test_acc, test_loss, test_table = test(test_loader, create_table=True)
+    if use_wandb:
+        wandb.log({
+            "train/loss": train_loss,
+            "train/acc": train_acc,
+            "test/acc": test_acc,
+            "test/loss": test_loss,
+            "test/table": test_table
+        })
+    torch.save(model, "graph_classification_model.pt")
+    if use_wandb:
+        artifact = wandb.Artifact(name="graph_classification_model", type="model")
+        artifact.add_file("graph_classification_model.pt")
+        wandb.log_artifact(artifact)
+
+if use_wandb:
+    wandb.finish()
