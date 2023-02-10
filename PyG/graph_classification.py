@@ -5,7 +5,7 @@ import collections
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
+#import seaborn as sns
 import plotly
 import scipy.sparse as sp
 import wandb
@@ -34,7 +34,7 @@ if use_wandb:
         name=wandb_run_name
     )
 
-dataset_path = "../data/TUDataset"
+dataset_path = "./data/TUDataset"
 dataset = TUDataset(root=dataset_path, name="MUTAG")
 dataset.download()
 
@@ -57,7 +57,7 @@ def create_graph(graph):
     vis = GraphVisualization(
         g, 
         pos, 
-        node_text_position="top_left",
+        node_text_position="top left",
         node_size=20
     )
     fig = vis.create_figure()
@@ -148,4 +148,55 @@ class GCN(torch.nn.Module):
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin(x)
         return x
-    
+
+wandb_project = "PyG_Intro"
+wandb_run_name = "upload_and_analyze_dataset"
+
+if use_wandb:
+    wandb.init(
+        project=wandb_project
+    )
+    wandb.use_artifact("eshban9492/PyG_Intro/MUTAG:v0")
+
+model = GCN(hidden_channels=64)
+print(model)
+
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+criterion = torch.nn.CrossEntropyLoss()
+
+def train():
+    model.train()
+    for data in train_loader:
+        out = model(data.x, data.edge_index, data.batch)
+        loss = criterion(out, data.y)
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+
+def test(loader, create_table=False):
+    model.eval()
+    table = wandb.Table(
+        columns=[
+            "graph",
+            "ground truth",
+            "prediction"
+        ]
+    ) if use_wandb else None
+    correct = 0
+    loss_ = 0
+    for data in loader:
+        out = model(data.x, data.edge_index, data.batch)
+        loss = criterion(out, data.y)
+        loss_ += loss.item()
+        pred = out.argmax(dim=1)
+        if create_table and use_wandb:
+            table.add_data(
+                wandb.Html(
+                    plotly.io.to_html(create_graph(data))
+                ),
+                data.y.item(),
+                pred.item()
+            )
+        correct += int((pred == data.y).sum())
+    return correct / len(loader.dataset), loss_ / len(loader.dataset), table
+
