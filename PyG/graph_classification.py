@@ -63,8 +63,8 @@ def create_graph(graph):
     fig = vis.create_figure()
     return fig
 
-fig = create_graph(dataset[0])
-fig.show()
+# fig = create_graph(dataset[0])
+# fig.show()
 
 if use_wandb:
     table = wandb.Table(
@@ -135,15 +135,15 @@ class GCN(torch.nn.Module):
         torch.manual_seed(42)
         self.conv1 = GCNConv(dataset.num_node_features, hidden_channels)
         self.conv2 = GCNConv(hidden_channels, hidden_channels)
-        self.conv3 = GCNConv(hidden_channels, hidden_channels)
+        # self.conv3 = GCNConv(hidden_channels, hidden_channels)
         self.lin = Linear(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index, batch):
         x = self.conv1(x, edge_index)
         x = x.relu()
         x = self.conv2(x, edge_index)
-        x = x.relu()
-        x = self.conv3(x, edge_index)
+        # x = x.relu()
+        # x = self.conv3(x, edge_index)
         x = global_mean_pool(x, batch)
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin(x)
@@ -212,11 +212,11 @@ for epoch in trange(1, 171):
             "test/loss": test_loss,
             "test/table": test_table
         })
-    torch.save(model, "graph_classification_model.pt")
-    if use_wandb:
-        artifact = wandb.Artifact(name="graph_classification_model", type="model")
-        artifact.add_file("graph_classification_model.pt")
-        wandb.log_artifact(artifact)
+    # torch.save(model, "graph_classification_model.pt")
+    # if use_wandb:
+    #     artifact = wandb.Artifact(name="graph_classification_model", type="model")
+    #     artifact.add_file("graph_classification_model.pt")
+    #     wandb.log_artifact(artifact)
 
 if use_wandb:
     wandb.finish()
