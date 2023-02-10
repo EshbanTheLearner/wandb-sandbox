@@ -15,6 +15,7 @@ import torch_geometric
 from torch_geometric.nn import GCNConv
 from torch_geometric.utils import to_networkx
 from torch_geometric.datasets import TUDataset
+from torch_geometric.loader import DataLoader
 import networkx as nx
 from networkx.algorithms import community
 from tqdm.auto import trange
@@ -97,3 +98,33 @@ if use_wandb:
     dataset_artifact.add_dir(dataset_path)
     wandb.log_artifact(dataset_artifact)
     wandb.finish()
+
+torch.manual_seed(42)
+
+dataset = dataset.shuffle()
+
+train_dataset = dataset[:150]
+test_dataset = dataset[150:]
+
+print(f"Number of Training Graphs: {len(train_dataset)}")
+print(f"Number of Test Graphs: {len(test_dataset)}")
+
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=64,
+    shuffle=True
+)
+
+test_loader = DataLoader(
+    test_dataset,
+    batch_size=1,
+    shuffle=False
+)
+
+for step, data in enumerate(train_loader):
+    print(f"Step {step + 1}:")
+    print("=======")
+    print(f"Number of graphs in current batch: {data.num_graphs}")
+    print(data)
+    print()
+
