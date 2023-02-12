@@ -2,6 +2,9 @@
 *.train
 *.test
 *.csv
+*.pt
+*.ckpt
+None/
 data/
 logs/
 models/
