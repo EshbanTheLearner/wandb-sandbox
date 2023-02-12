@@ -73,3 +73,64 @@ class TorchTensorboardProfilerCallback(pl.Callback):
         self.profiler.step()
         pl_module.log_dict(outputs)
 
+config = {
+    "batch_size": 32,
+    "num_workers": 0,
+    "pin_memory": False,
+    "precision": 32,
+    "optimizer": "Adadelta"
+}
+
+with wandb.init(project="mnist-trace", config=config) as run:
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+    
+    dataset = datasets.MNIST(
+        "./data",
+        train=True,
+        download=True,
+        transform=transform
+    )
+
+    trainloader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=wandb.config.batch_size,
+        num_workers=wandb.config.num_workers,
+        pin_memory=wandb.config.pin_memory
+    )
+
+    model = Net(optimizer=wandb.config["optimizer"])
+
+    wait, warmup, active, repeat = 1, 1, 2, 1
+    total_steps = (wait + warmup + active) * (1 + repeat)
+    schedule = torch.profiler.schedule(
+        wait=wait,
+        warmup=warmup,
+        active=active,
+        repeat=repeat
+    )
+    profiler = torch.profiler.profile(
+        schedule=schedule,
+        on_trace_ready=tensorboard_trace_handler("wandb/latest-run/tbprofile"),
+        with_stack=False
+    )
+
+    with profiler:
+        profiler_callback = TorchTensorboardProfilerCallback(profiler)
+        trainer = pl.Trainer(
+            gpus=0,
+            max_epochs=1,
+            max_steps=total_steps,
+            logger=pl.loggers.WandbLogger(
+                log_model=True, 
+                save_code=True
+            ),
+            callbacks=[profiler_callback],
+            precision=wandb.config.precision
+        )
+        trainer.fit(model, trainloader)
+    profile_art = wandb.Artifact(f"trace-{wandb.run.id}", type="profile")
+    profile_art.add_file(glob.glob("wandb/latest-run/tbprofile/*.pt.trace.json")[0], "trace.pt.trace.json")
+    run.log_artifact(profile_art)
