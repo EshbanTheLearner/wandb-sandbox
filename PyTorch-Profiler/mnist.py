@@ -50,3 +50,14 @@ class Net(pl.LightningModule):
         return OPTIMIZERS[optimizer]
     
 
+def training_step(self, batch, idx):
+    inputs, labels = batch
+    outputs = self(inputs)
+    loss = F.nll_loss(outputs, labels)
+    return {
+        "loss": loss
+    }
+
+def configure_optimizers(self):
+    return self.optimizer(self.parameters(), lr=0.1)
+
