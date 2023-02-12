@@ -61,3 +61,15 @@ def training_step(self, batch, idx):
 def configure_optimizers(self):
     return self.optimizer(self.parameters(), lr=0.1)
 
+Net.training_step = training_step
+Net.configure_optimizers = configure_optimizers
+
+class TorchTensorboardProfilerCallback(pl.Callback):
+    def __init__(self, profiler):
+        super().__init__()
+        self.profiler = profiler
+    
+    def on_train_batch_end(self, trainer, pl_module, outputs, *args, **kwargs):
+        self.profiler.step()
+        pl_module.log_dict(outputs)
+
