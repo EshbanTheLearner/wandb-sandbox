@@ -60,3 +60,25 @@ def train(model, device, train_loader, optimizer, criterion, epoch, steps_per_ep
         "Epoch": epoch
     })
 
+def test(model, device, test_loader, criterion, classes):
+    model.eval()
+    test_loss = 0
+    test_total = 0
+    test_correct = 0
+
+    example_images = []
+    with torch.no_grad():
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            test_loss += criterion(output, target).item()
+            scores, predictions = torch.max(output.data, 1)
+            test_total += target.size(0)
+            test_correct += int(sum(predictions == target))
+    acc = round((test_correct / test_total) * 100, 2)
+    print(f"Test Loss: {test_loss/test_total}, Test Accuracy: {acc}")
+    wandb.log({
+        "Test Loss": test_loss/test_total,
+        "Test Accuracy": acc
+    })
+
