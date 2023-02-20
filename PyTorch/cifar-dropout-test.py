@@ -32,3 +32,31 @@ CLASS_NAMES = (
     "plane", "car", "bird", "cat", "deer",
     "dog", "frog", "horse", "ship",  "truck"
 )
+
+def train(model, device, train_loader, optimizer, criterion, epoch, steps_per_epoch=20):
+    model.train()
+    train_loss = 0
+    train_total = 0
+    train_correct = 0
+
+    for batch_idx, (data, target) in enumerate(train_loader, start=0):
+        data, target = data.to(device), target.to(device)
+        optimizer.zero_grad()
+        output = model(data)
+        loss = criterion(output, target)
+        train_loss += loss.item()
+        scores, predictions = torch.max(output.data, 1)
+        train_total += target.size(0)
+        train_correct += int(sum(predictions == target))
+        optimizer.zero_grad()
+        loss.backwards()
+        optimizer.step()
+    
+    acc = round((train_correct / train_total) * 100, 2)
+    print(f"Epoch [{epoch}], Loss: {train_loss/train_total}, Accuracy: {acc}")
+    wandb.log({
+        "Train Loss": train_loss/train_total,
+        "Train Accuracy": acc,
+        "Epoch": epoch
+    })
+
