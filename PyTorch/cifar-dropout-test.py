@@ -116,3 +116,9 @@ class Net(nn.Module):
     x = F.relu(self.fc1(x))
     x = self.fc2(x)
     return x
+  
+net = Net().to(device)
+print(net)
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(net.parameters())
