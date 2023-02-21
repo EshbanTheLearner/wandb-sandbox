@@ -22,7 +22,7 @@ transform = transforms.Compose([
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 
-trainset = torchvision.datasets.CIFAR10(root="../data", train=True, download=True, transforms=transform)
+trainset = torchvision.datasets.CIFAR10(root="../data", train=True, download=True, transform=transform)
 testset = torchvision.datasets.CIFAR10(root="../data", train=False, download=True, transform=transform)
 
 trainloader = DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
@@ -49,7 +49,7 @@ def train(model, device, train_loader, optimizer, criterion, epoch, steps_per_ep
         train_total += target.size(0)
         train_correct += int(sum(predictions == target))
         optimizer.zero_grad()
-        loss.backwards()
+        loss.backward()
         optimizer.step()
     
     acc = round((train_correct / train_total) * 100, 2)

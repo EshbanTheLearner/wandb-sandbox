@@ -1,3 +1,5 @@
 # Weights and Biases Dashboard
 
-![](metrics.png)
+![](1.png)
+
+![](2.png)
