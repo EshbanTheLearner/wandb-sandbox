@@ -122,3 +122,13 @@ print(net)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters())
+
+wandb.init(project="dropout")
+wandb.watch(net, log="all")
+
+for epoch in range(8):
+  train(net, device, trainloader, optimizer, criterion, epoch)
+  test(net, device, testloader, criterion, CLASS_NAMES)
+
+print("Finished Training")
+wandb.finish()
